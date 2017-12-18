@@ -1,13 +1,16 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button, AsyncStorage} from 'react-native';
 import { StackNavigator } from 'react-navigation';
-import { ProfileScreen } from './screens/ProfileScreen.js'
 import { LoginScreen } from './screens/LoginScreen.js'
+import { OptionsScreen } from './screens/OptionsScreen.js'
+import { DocChooseScreen } from './screens/DocChooseScreen.js'
 
-class MyHomeScreen extends React.Component {
+class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {message: ""}
+    this.state = {
+      message: "",
+    }
   }
 
   static navigationOptions = {
@@ -20,7 +23,10 @@ class MyHomeScreen extends React.Component {
 
     if (this.state.message === '') {
       return (
-        <Text>{this.state.message}</Text>
+        <View>
+          <Button title='Browse terms' onPress={() => this.props.navigation.navigate('DocChoose')}/>
+          <Button title='Your visits' onPress={() => true}/>
+        </View>
       );
     }
     return (
@@ -37,16 +43,13 @@ class MyHomeScreen extends React.Component {
   async getToken () {
     try {
       const token = await AsyncStorage.getItem('@DocAppStore:token')
-      if (token !== null) {
-        this.setState({
-        });
-      } else {
+      if (token === null) {
         this.setState({
           message: "You are not authorized. Please log in."
         });
       }
     } catch(error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -54,11 +57,19 @@ class MyHomeScreen extends React.Component {
 
 const ModalStack = StackNavigator({
   Home: {
-    screen: MyHomeScreen,
+    screen: HomeScreen,
   },
   Login: {
     path: 'login',
     screen: LoginScreen,
+  },
+  Options: {
+    path: 'options',
+    screen: OptionsScreen,
+  },
+  DocChoose: {
+    path: 'doctor',
+    screen: DocChooseScreen,
   },
 });
 

@@ -5,6 +5,7 @@ import { StackNavigator } from 'react-navigation';
 export class LoginScreen extends React.Component {
   static navigationOptions = {
     title: 'Login',
+    headerStyle: {backgroundColor: 'steelblue'},
   }
 
   render() {
