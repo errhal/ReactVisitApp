@@ -4,6 +4,9 @@ import { StackNavigator } from 'react-navigation';
 import { LoginScreen } from './screens/LoginScreen.js'
 import { OptionsScreen } from './screens/OptionsScreen.js'
 import { DocChooseScreen } from './screens/DocChooseScreen.js'
+import { VisitsScreen } from './screens/VisitsScreen.js'
+import { SavedVisitScreen } from './screens/SavedVisitScreen.js'
+
 
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -70,6 +73,14 @@ const ModalStack = StackNavigator({
   DocChoose: {
     path: 'doctor',
     screen: DocChooseScreen,
+  },
+  Visits: {
+    path: 'visits',
+    screen: VisitsScreen,
+  },
+  SavedVisit: {
+    path: 'saved',
+    screen: SavedVisitScreen,
   },
 });
 
