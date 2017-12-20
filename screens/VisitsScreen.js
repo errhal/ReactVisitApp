@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, WebView, FlatList} from 'react-native';
+import { StyleSheet, Text, View, Button, WebView, FlatList, SectionList, Header } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 
 export class VisitsScreen extends React.Component {
@@ -16,11 +16,26 @@ export class VisitsScreen extends React.Component {
   }
 
   componentDidMount() {
-    return fetch('https://www.google.com/')
-      .then((response) => {
-        let data = [{key: 'Tuesday'}, {key: 'Wednesday'}]
+    return fetch('https://zielonks.pythonanywhere.com/api/doctors/'
+    + this.props['navigation']['state']['params']['doctor']['id']
+    + '/available_hours?access_token='
+    + this.props['navigation']['state']['params']['token'])
+      .then(response => response.json())
+      .then(responseJson => {
+        // responseJson.map(item => item['title'] = item['key'])
+        let uniqKey = 0;
+        let dates = [];
+        for (var key in responseJson) {
+          if (responseJson.hasOwnProperty(key)) {
+            let hours = [];
+            for (var d in responseJson[key]) {
+              hours.push({key: uniqKey++, hour: responseJson[key][d].split('T')[1].substring(0, 5), date: responseJson[key][d]})
+            }
+            dates.push({title: key.split(' ')[0], data: hours});
+          }
+        }
         this.setState({
-          data: data,
+          data: dates,
           isLoaded: true,
         });
       });
@@ -35,10 +50,11 @@ export class VisitsScreen extends React.Component {
     }
 
     return (
-      <FlatList
-         data={this.state.data}
-         renderItem={({item}) => <Button title={item.key} onPress={() => this.props.navigation.navigate('SavedVisit')}/>}
-       />
+      <SectionList
+        renderItem={({item}) => <Button title={item.hour} onPress={() => this.props.navigation.navigate('SavedVisit', {date: item, doctor: this.props['navigation']['state']['params']['doctor']['id'], token: this.props['navigation']['state']['params']['token']})}/>}
+        renderSectionHeader={({section}) => <View style={{alignItems: 'center',}}><Text>{section.title}</Text></View>}
+        sections={this.state.data}
+      />
     );
   }
 }

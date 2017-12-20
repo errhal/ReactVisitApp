@@ -17,8 +17,20 @@ export class SavedVisitScreen extends React.Component {
   }
 
   componentDidMount() {
-    return fetch('https://www.google.com/')
+    return fetch('https://zielonks.pythonanywhere.com/api/visits/?access_token='
+    + this.props['navigation']['state']['params']['token'], {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        date: this.props['navigation']['state']['params']['date']['date'],
+        doctor: this.props['navigation']['state']['params']['doctor']
+      }),
+    })
       .then((response) => {
+        console.log(response);
         this.setState({
           isLoaded: true,
           isSaved: true,
