@@ -30,7 +30,6 @@ export class SavedVisitScreen extends React.Component {
       }),
     })
       .then((response) => {
-        console.log(response);
         this.setState({
           isLoaded: true,
           isSaved: true,

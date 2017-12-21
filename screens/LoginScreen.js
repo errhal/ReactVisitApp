@@ -1,12 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, WebView, AsyncStorage} from 'react-native';
+import { StyleSheet, Text, View, Button, WebView, AsyncStorage, TextInput } from 'react-native';
 import { StackNavigator } from 'react-navigation';
+var CryptoJS = require("crypto-js");
 
 export class LoginScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      state: Math.random().toString(36)
+      state: Math.random().toString(36),
+      writtenPin: false,
+      token: null,
     };
   }
 
@@ -15,7 +18,7 @@ export class LoginScreen extends React.Component {
     headerStyle: {backgroundColor: 'steelblue'},
   }
 
-  async checkIfAuthorized(e) {
+  checkIfAuthorized(e) {
     if (e.url.match(/http:\/\/localhost:8000\/#/g)) {
       let params = e.url.split("&");
       if (params.length != 5) {
@@ -38,26 +41,46 @@ export class LoginScreen extends React.Component {
         console.error("Invalid state param! Possible CSRF attack");
         return;
       }
-      if (accessToken != null) {
 
-        await AsyncStorage.setItem('@DocAppStore:token', accessToken);
-        this.props.navigation.state.params.context.setState({
-          token: accessToken,
-        });
-        this.props.navigation.state.params.context.render();
-        this.props.navigation.goBack();
-      } else {
-        console.error("Something went wrong")
-      }
+      this.setState({
+        writtenPin: true,
+        token: accessToken,
+      });
+    }
+  }
+
+  async encryptToken() {
+    let accessToken = this.state.token;
+    if (accessToken != null) {
+      var encrypted = CryptoJS.AES.encrypt('TOKEN_' + accessToken, this.state.pin);
+
+      await AsyncStorage.setItem('@DocAppStore:token', encrypted.toString());
+      this.props.navigation.state.params.context.setState({
+        token: encrypted.toString(),
+      });
+      this.props.navigation.state.params.context.render();
+      this.props.navigation.goBack();
+    } else {
+      console.error("Something went wrong")
     }
   }
 
   render() {
+
+    if( this.state.writtenPin === false ) {
+      return (
+        <WebView
+          source={{uri: 'https://zielonks.pythonanywhere.com/o/authorize?grant_type=implicit&client_id=JTgZ6X0SipUHnEy79brxjpbtsB734L6qLlPucqOX&redirect_uri=http://localhost:8000&response_type=token&state=' + this.state.state}}
+          onNavigationStateChange={(e) => this.checkIfAuthorized(e)}
+          />
+      );
+    }
+
     return (
-      <WebView
-        source={{uri: 'https://zielonks.pythonanywhere.com/o/authorize?grant_type=implicit&client_id=JTgZ6X0SipUHnEy79brxjpbtsB734L6qLlPucqOX&redirect_uri=http://localhost:8000&response_type=token&state=' + this.state.state}}
-        onNavigationStateChange={(e) => this.checkIfAuthorized(e)}
-      />
+      <View>
+        <TextInput placeholder="pin" onChangeText={(pin) => this.setState({pin: pin})}/>
+        <Button title="OK" onPress={() => this.encryptToken()}/>
+      </View>
     );
   }
 }

@@ -20,7 +20,6 @@ export class SavedVisitsScreen extends React.Component {
       .then(response => response.json())
       .then(responseJson => {
         let key = 0;
-        console.log(responseJson)
         responseJson.map(item => {item['date'] = (new Date(item.date)).toLocaleDateString(); item['key'] = key++;})
         this.setState({
           data: responseJson,
